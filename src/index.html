@@ -9,6 +9,22 @@
     <title>HBO Wallet</title>
 </head>
 <body>
+    <div id="landing" class="container">
+        <h1>HBO Wallet</h1>
+        <p>This is a demo wallet created with JavaScript!</p>
+        <h5>Connect MetaMask</h5>
+        <button id="init" type="submit" class="btn btn-primary">Connect</button>
+    </div>
+    <div id="loading" class="hide"></div>
+    <div id="page" class="hide">
+        <nav>
+            <ul>
+                <li id="balances" class="nav-link">Balances</li>
+                <li id="transfer" class="nav-link">Transfer</li>
+                <li id="details" class="nav-link"></li>
+            </ul>
+        </nav>
+    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/web3.min.js"></script>
     <script src="js/truffle-contract.js"></script>
