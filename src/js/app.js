@@ -1,6 +1,8 @@
-App = {
+const App = {
     web3Provider: null,
     contracts: {},
+    asyncProcess: false,
+    currentAccount: null,
 
     initWeb3: async function(){
         // Modern dapp browsers...
@@ -35,20 +37,40 @@ App = {
           
             // Set the provider for contract
             App.contracts.Token.setProvider(App.web3Provider);
+
+            // Use contract to retrieve blockchain data
+            return App.loadData();
         });
-        // Use contract to retrieve blockchain data
-        return App.loadData();
     },
     
     loadData: async function(){
+        // Get user accounts
+        try{
+            const accts = await ethereum.request({method: 'eth_accounts'});
 
+            if (accts.length === 0) {
+                // MetaMask is locked or the user has not connected any accounts
+                console.log('Please connect to MetaMask.');
+            } else if (accts[0] !== App.currentAccount) {
+                App.currentAccount = accts[0];
+                //load blockchain data
+                const instance = await App.contracts.Token.deployed();
+                const balance = await instance.balanceOf(App.currentAccount);
+                //display balance
+                $('#tkn-balance').html(Number(balance));
+            }
+        } catch (error) {
+            console.error(error);
+        }
     }
+
 }
 
 
 $(document).ready(function() {
-    $('#init').click( function (event) {
+    //Initialize web3 on button click
+    $('#connect-web3').click( function (event) {
         event.preventDefault();
-        App.initWeb3();
+        // App.initWeb3();
     });
 });

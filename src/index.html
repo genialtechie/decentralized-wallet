@@ -9,21 +9,43 @@
     <title>HBO Wallet</title>
 </head>
 <body>
-    <div id="landing" class="container">
+    <div id="landing" class="container hide">
         <h1>HBO Wallet</h1>
         <p>This is a demo wallet created with JavaScript!</p>
         <h5>Connect MetaMask</h5>
-        <button id="init" type="submit" class="btn btn-primary">Connect</button>
+        <button id="connect-web3" type="submit" class="btn btn-primary">Connect</button>
     </div>
-    <div id="loading" class="hide"></div>
-    <div id="page" class="hide">
-        <nav>
-            <ul>
-                <li id="balances" class="nav-link">Balances</li>
-                <li id="transfer" class="nav-link">Transfer</li>
-                <li id="details" class="nav-link"></li>
-            </ul>
-        </nav>
+    <div id="page" class="">
+        <div id="loading" class="hide"></div>
+        <div id="main-ui">
+            <!-- <div id="transfer">
+                <form action="" method="post">
+                    <label for="amount">Amount</label>
+                    <input type="text" id="amount" name="amount">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address">
+                    <button id="snd-tkns" type="submit">Send</button>
+                </form>
+            </div> -->
+            <div id="balances" class="container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                          <th scope="col">Symbol</th>
+                          <th scope="col">Name</th>
+                          <th scope="col">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="tkn-symbol">MTK</td>
+                            <td class="tkn-name">Token</td>
+                            <td class="tkn-balance"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/web3.min.js"></script>

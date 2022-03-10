@@ -6,10 +6,14 @@ body{
 }
 
 .container {
-    max-width: fit-content;
+    min-width: fit-content;
     text-align: center;
 }
 
 .hide {
     display: none;
+}
+
+#balances {
+    width: 50%;
 }
