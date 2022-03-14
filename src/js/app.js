@@ -1,10 +1,11 @@
 const App = {
     web3Provider: null,
     contracts: {},
-    asyncProcess: false,
+    asyncProcess: null,
     currentAccount: null,
 
     initWeb3: async function(){
+        App.asyncProcess = true;
         // Modern dapp browsers...
         if (window.ethereum) {
             App.web3Provider = window.ethereum;
@@ -13,8 +14,9 @@ const App = {
             await ethereum.request({method: 'eth_requestAccounts'});
             } catch (error) {
             // User denied account access...
-            console.error("User denied account access")
-            alert('Please connect MetaMask to use HBO Wallet')
+            console.error("User denied account access");
+            $('#landing').removeClass('hide');
+            alert('Please connect MetaMask to use HBO Wallet');
             }
         }
         // Legacy dapp browsers...
@@ -44,7 +46,7 @@ const App = {
     },
     
     loadData: async function(){
-        // Get user accounts
+        // Get user accounts and display data to UI
         try{
             const accts = await ethereum.request({method: 'eth_accounts'});
 
@@ -57,20 +59,47 @@ const App = {
                 const instance = await App.contracts.Token.deployed();
                 const balance = await instance.balanceOf(App.currentAccount);
                 //display balance
-                $('#tkn-balance').html(Number(balance));
+                $('.tkn-balance').html(Number(balance).toString());
+                $('.user-address').html(`Connected to ${App.currentAccount}`);
+                App.asyncProcess = false;
             }
         } catch (error) {
             console.error(error);
         }
-    }
+    },
 
+    asyncProcessUi: function() {
+        const hidden = $('#landing').hasClass('hide');
+        if (App.asyncProcess && !hidden) {
+            $('#landing').addClass('hide');
+            $('#loading').removeClass('hide');
+        } else if(App.asyncProcess && hidden) {
+            $('#loading').removeClass('hide');
+            $('#page').removeClass('hide');
+        }
+        else if (!App.asyncProcess){
+            $('#page').removeClass('hide');
+            $('#loading').css('display', 'none');
+        }
+    },
+
+    transferTkns: async function() {
+        App.asyncProcess = true;
+
+    }
 }
 
+$(window).on('load', async function(){
+    // init web3 on page reload
+    App.asyncProcessUi();
+    await App.initWeb3();
+    App.asyncProcessUi();
 
-$(document).ready(function() {
     //Initialize web3 on button click
-    $('#connect-web3').click( function (event) {
+    $('#connect-web3').click( async function (event) {
         event.preventDefault();
-        // App.initWeb3();
+        App.asyncProcessUi();
+        await App.initWeb3();
+        App.asyncProcessUi();
     });
 });

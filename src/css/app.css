@@ -8,6 +8,7 @@ body{
 .container {
     min-width: fit-content;
     text-align: center;
+    margin-bottom: 50px;
 }
 
 .hide {
@@ -15,5 +16,10 @@ body{
 }
 
 #balances {
+    width: 50%;
+}
+
+#transfer{
+    text-align: left;
     width: 50%;
 }
