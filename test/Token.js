@@ -15,6 +15,7 @@ contract('Token Contract', async function(accounts){
     //test token supply
     it('deploy', async function(){ 
         const balance = await instance.balanceOf(deployer);
-        assert.equal(balance, 10000);
+        balance = Number(balance);
+        assert.equal(balance, 100000000000000000000n);
     });
 });

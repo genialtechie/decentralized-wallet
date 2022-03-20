@@ -1,21 +1,21 @@
-const App = {
+App = {
     web3Provider: null,
     contracts: {},
-    asyncProcess: null,
+    asyncProcess: false,
     currentAccount: null,
 
     initWeb3: async function(){
-        App.asyncProcess = true;
         // Modern dapp browsers...
         if (window.ethereum) {
             App.web3Provider = window.ethereum;
             try {
             // Request account access
             await ethereum.request({method: 'eth_requestAccounts'});
+            //if accounts are succesfully accessed, change UI
+            $('#landing ,#loading').addClass('hide');
             } catch (error) {
             // User denied account access...
             console.error("User denied account access");
-            $('#landing').removeClass('hide');
             alert('Please connect MetaMask to use HBO Wallet');
             }
         }
@@ -34,8 +34,8 @@ const App = {
     initContract: function(){
         $.getJSON('Token.json', function(data) {
             // Get the necessary contract artifact file and instantiate it with @truffle/contract
-            const artifact = data;
-            App.contracts.Token = TruffleContract(artifact);
+            const token = data;
+            App.contracts.Token = TruffleContract(token);
           
             // Set the provider for contract
             App.contracts.Token.setProvider(App.web3Provider);
@@ -44,62 +44,53 @@ const App = {
             return App.loadData();
         });
     },
-    
-    loadData: async function(){
-        // Get user accounts and display data to UI
-        try{
-            const accts = await ethereum.request({method: 'eth_accounts'});
 
-            if (accts.length === 0) {
-                // MetaMask is locked or the user has not connected any accounts
-                console.log('Please connect to MetaMask.');
-            } else if (accts[0] !== App.currentAccount) {
-                App.currentAccount = accts[0];
-                //load blockchain data
-                const instance = await App.contracts.Token.deployed();
-                const balance = await instance.balanceOf(App.currentAccount);
-                //display balance
-                $('.tkn-balance').html(Number(balance).toString());
-                $('.user-address').html(`Connected to ${App.currentAccount}`);
-                App.asyncProcess = false;
-            }
+    loadData: async function() {
+        try {
+            //get the first account from the connected accounts
+            const [account] = await ethereum.request({method: 'eth_accounts'});
+            App.currentAccount = account;
+            $('.user-address').html(`Connected to ${App.currentAccount}`);
+            //create contract instance and check balance
+            web3.eth.defaultAccount = App.currentAccount;
+            const token = await App.contracts.Token.deployed();
+            let balance = await token.balanceOf.call(App.currentAccount);
+            balance = balance.toString();
+            balance = web3.fromWei(balance);
+            $('.tkn-balance').html(balance);
         } catch (error) {
-            console.error(error);
+            console.error(error)
         }
     },
 
-    asyncProcessUi: function() {
-        const hidden = $('#landing').hasClass('hide');
-        if (App.asyncProcess && !hidden) {
-            $('#landing').addClass('hide');
-            $('#loading').removeClass('hide');
-        } else if(App.asyncProcess && hidden) {
-            $('#loading').removeClass('hide');
-            $('#page').removeClass('hide');
+    sendTokens: async function() {
+        try {
+            //get the first account from the connected accounts
+            const [account] = await ethereum.request({method: 'eth_accounts'});
+            App.currentAccount = account;
+            web3.eth.defaultAccount = App.currentAccount; // set default account for transactions
+            //create contract instance and init transfer
+            const recipient = $('#address').val();
+            let amount = $('#amount').val();
+            const token = await App.contracts.Token.deployed();
+            await token.transfer(recipient, web3.toWei(amount));
+            alert(`Your transfer of ${amount} MTK to ${recipient} has been initiated`);
+        } catch (error) {
+            console.error(error)
         }
-        else if (!App.asyncProcess){
-            $('#page').removeClass('hide');
-            $('#loading').css('display', 'none');
-        }
-    },
-
-    transferTkns: async function() {
-        App.asyncProcess = true;
-
     }
 }
 
 $(window).on('load', async function(){
     // init web3 on page reload
-    App.asyncProcessUi();
-    await App.initWeb3();
-    App.asyncProcessUi();
-
-    //Initialize web3 on button click
-    $('#connect-web3').click( async function (event) {
+    App.initWeb3();
+    //Init web3 and token
+    $('#connect-web3 ,#snd-tkns').click( function (event) {
         event.preventDefault();
-        App.asyncProcessUi();
-        await App.initWeb3();
-        App.asyncProcessUi();
+        if(event.target.id == 'connect-web3'){
+            App.initWeb3();
+        } else {
+            App.sendTokens();
+        }
     });
 });
